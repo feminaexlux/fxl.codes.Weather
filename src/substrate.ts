@@ -1,36 +1,21 @@
 // TS attempt of http://www.complexification.net/gallery/machines/substrate/index.php by laniaung.me 2025-06-02
+import State from "./state"
+import SandPainter from "./sandPainter"
+
 export default class Substrate {
-    private colors = [ 0x3a1e3e, 0x7c2d3b, 0xb94f3c, 0xf4a462, 0xf9c54e ] // https://colormagic.app/palette/671eeb6c42273fc4c1bb1ac7
-    private maxCracks = 20
+    private state: State
 
-    constructor(maxCracks: number) {
-        this.maxCracks = maxCracks
-    }
-}
+    constructor(id: string, maxCracks: number, colors?: number[]) {
+        if (!colors?.length) colors = [ 0x3a1e3e, 0x7c2d3b, 0xb94f3c, 0xf4a462, 0xf9c54e ] // https://colormagic.app/palette/671eeb6c42273fc4c1bb1ac7
 
-class State {
-    crackGrid: number[]
-    height: number
-    width: number
-
-    constructor(height: number, width: number) {
-        this.height = height
-        this.width = width
-        this.crackGrid = []
-
-        for (let x = 0; x < width; x++) {
-            for (let y = 0; y < height; y++) {
-                this.crackGrid[y * width + x] = 10000
-            }
+        let canvas = document.getElementById(id)
+        if (!canvas) {
+            canvas = document.createElement("canvas")
+            document.body.appendChild(canvas)
         }
 
-        for (let i = 0; i < 16; i++) {
-            this.crackGrid[Math.floor(Math.random() * (height * width))] = Math.ceil(Math.random() * 360)
-        }
+        this.state = new State(colors, maxCracks, canvas.clientHeight, canvas.clientWidth)
     }
-}
-
-class SandPainter {
 }
 
 class Crack {
@@ -41,7 +26,7 @@ class Crack {
     private state: State
 
     constructor(state: State) {
-        this.painter = new SandPainter()
+        this.painter = new SandPainter(state)
         this.state = state
         this.init()
     }
@@ -73,6 +58,15 @@ class Crack {
     }
 
     continue() {
-
+        this.x += .42 * Math.cos(this.angle * Math.PI / 180)
+        this.y += .42 * Math.sin(this.angle * Math.PI / 180)
     }
 }
+
+declare global {
+    interface Window {
+        main: Substrate
+    }
+}
+
+window.main = new Substrate("substrate-canvas", 20)

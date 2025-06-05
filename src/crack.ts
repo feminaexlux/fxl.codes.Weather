@@ -8,18 +8,18 @@ export default class Crack {
     private painter: SandPainter
     private state: State
 
-    constructor(state: State) {
-        this.painter = new SandPainter(state.getRandomColor())
+    constructor(state: State, x: number, y: number, angle: number) {
+        this.painter = new SandPainter(state.getRandomColor(), state.isWithinBoundary.bind(state))
         this.state = state
+        this.x = x
+        this.y = y
+        this.angle = angle
         this.init()
     }
 
     init() {
-        const index = Math.floor(Math.random() * this.state.seeds.length)
-        const {x, y} = this.state.seeds.splice(index, 1)[0]
         const flip = Math.random() < 0.5
-        let angle = this.state.grid[x][y]
-        this.start(x, y, angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1))
+        this.start(this.x, this.y, this.angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1))
     }
 
     start(x: number, y: number, angle: number) {
@@ -38,9 +38,7 @@ export default class Crack {
 
         const x = Math.floor(this.x)
         const y = Math.floor(this.y)
-        const height = this.state.canvas.height
-        const width = this.state.canvas.width
-        if (x >= 0 && x < width && y >= 0 && y < height) {
+        if (this.state.isWithinBoundary(x, y)) {
             const seed = this.state.grid[x][y]
             if (seed > 10000 || Math.abs(seed - this.angle) < 5) {
                 this.state.grid[x][y] = Math.floor(this.angle)

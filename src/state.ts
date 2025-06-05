@@ -20,6 +20,7 @@ export default class State {
 
     init() {
         this.seeds = []
+        this.cracks = []
         const height = this.canvas.height
         const width = this.canvas.width
         const context = this.canvas.getContext("2d")
@@ -34,14 +35,13 @@ export default class State {
             }
         }
 
-        for (let i = 0; i < 16; i++) {
+        for (let i = 0; i < 3; i++) {
             const x = Math.floor(Math.random() * width)
             const y = Math.floor(Math.random() * height)
-            this.grid[x][y] = Math.floor(Math.random() * 360)
-            this.seeds.push({x, y})
+            const angle = Math.floor(Math.random() * 360)
+            this.cracks.push(new Crack(this, x, y, angle))
+            this.grid[x][y] = angle
         }
-
-        this.cracks = [new Crack(this), new Crack(this), new Crack(this)]
     }
 
     addCrack() {
@@ -50,5 +50,9 @@ export default class State {
 
     getRandomColor(): number {
         return this.colors[Math.floor(Math.random() * this.colors.length)]
+    }
+
+    isWithinBoundary(x: number, y: number): boolean {
+        return x >= 0 && x < this.canvas.width && y >= 0 && y < this.canvas.height
     }
 }

@@ -18,18 +18,16 @@ export default class Substrate {
 
     init() {
         const me = this
-        let request: number
         const draw = () => {
             for (const crack of me.state.cracks) crack.draw()
-            request = requestAnimationFrame(draw)
+            requestAnimationFrame(draw)
         }
 
         setInterval(() => {
-            cancelAnimationFrame(request)
             me.state.init()
-            request = requestAnimationFrame(draw)
-        }, 60 * 1000)
+            requestAnimationFrame(draw)
+        }, 120 * 1000)
 
-        request = requestAnimationFrame(draw)
+        requestAnimationFrame(draw)
     }
 }

@@ -1,5 +1,5 @@
 import Substrate from "./substrate"
-import Weather from "./weather";
+import Weather from "./weather"
 
 const background = new Substrate("substrate-canvas", 20)
 let weather: Weather

@@ -9,23 +9,16 @@ export default class Crack {
     private state: State
 
     constructor(state: State, x: number, y: number, angle: number) {
-        this.painter = new SandPainter(state.getRandomColor(), state.isWithinBoundary.bind(state))
+        this.painter = new SandPainter(state.getRandomColor())
         this.state = state
-        this.x = x
-        this.y = y
-        this.angle = angle
-        this.init()
-    }
-
-    init() {
-        const flip = Math.random() < 0.5
-        this.start(this.x, this.y, this.angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1))
+        this.start(x, y, angle)
     }
 
     start(x: number, y: number, angle: number) {
         this.x = x + .61 * Math.cos(angle * Math.PI / 180)
         this.y = y + .61 * Math.sin(angle * Math.PI / 180)
-        this.angle = angle
+        const flip = Math.random() < 0.5
+        this.angle = angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1)
     }
 
     draw() {
@@ -39,16 +32,17 @@ export default class Crack {
         const x = Math.floor(this.x)
         const y = Math.floor(this.y)
         if (this.state.isWithinBoundary(x, y)) {
-            const seed = this.state.grid[x][y]
-            if (seed > 10000 || Math.abs(seed - this.angle) < 5) {
+            const angle = this.state.grid[x][y]
+            if (angle > 10000) {
                 this.state.grid[x][y] = Math.floor(this.angle)
                 this.state.seeds.push({x, y})
-            } else if (Math.abs(seed - this.angle) > 2) {
-                this.init()
-                this.state.addCrack()
+            } else if (this.state.grid[x][y] != Math.floor(this.angle)) {
+                const entry = this.state.getNewEntry()
+                this.start(entry.x, entry.y, entry.angle)
             }
         } else {
-            this.init()
+            const entry = this.state.getNewEntry()
+            this.start(entry.x, entry.y, entry.angle)
             this.state.addCrack()
         }
     }

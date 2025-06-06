@@ -23,11 +23,7 @@ export default class Substrate {
             requestAnimationFrame(draw)
         }
 
-        setInterval(() => {
-            me.state.init()
-            requestAnimationFrame(draw)
-        }, 120 * 1000)
-
-        requestAnimationFrame(draw)
+        setInterval(() => me.state.init(), 120 * 1000)
+        draw()
     }
 }

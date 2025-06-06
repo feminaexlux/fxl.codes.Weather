@@ -14,13 +14,16 @@ export default class State {
         this.maxCracks = maxCracks
         this.grid = []
         this.cracks = []
+        this.seeds = []
 
         this.init()
     }
 
     init() {
-        this.seeds = []
-        this.cracks = []
+        this.cracks.length = 0
+        this.grid.length = 0
+        this.seeds.length = 0
+
         const height = this.canvas.height
         const width = this.canvas.width
         const context = this.canvas.getContext("2d")
@@ -28,7 +31,7 @@ export default class State {
         context.fillRect(0, 0, width, height)
 
         for (let x = 0; x < width; x++) {
-            if (!this.grid[x]) this.grid[x] = []
+            this.grid[x] = []
 
             for (let y = 0; y < height; y++) {
                 this.grid[x][y] = 10001
@@ -45,7 +48,10 @@ export default class State {
     }
 
     addCrack() {
-        if (this.cracks.length < this.maxCracks) this.cracks.push(new Crack(this))
+        if (this.cracks.length >= this.maxCracks) return
+
+        const {x, y, angle} = this.getNewEntry()
+        this.cracks.push(new Crack(this, x, y, angle))
     }
 
     getRandomColor(): number {
@@ -54,5 +60,28 @@ export default class State {
 
     isWithinBoundary(x: number, y: number): boolean {
         return x >= 0 && x < this.canvas.width && y >= 0 && y < this.canvas.height
+    }
+
+    getNewEntry(): {x: number, y: number, angle: number} {
+        if (!this.seeds.length) {
+            const x = Math.floor(Math.random() * this.canvas.width)
+            const y = Math.floor(Math.random() * this.canvas.height)
+            let angle = this.grid[x][y]
+
+            if (angle > 10000) {
+                angle = Math.floor(Math.random() * 360)
+                this.grid[x][y] = angle
+            }
+
+            return {x, y, angle}
+        }
+
+        const randomIndex = Math.floor(Math.random() * this.seeds.length)
+        const entry = this.seeds.splice(randomIndex, 1)[0]
+        return {
+            x: entry.x,
+            y: entry.y,
+            angle: this.grid[entry.x][entry.y]
+        }
     }
 }

@@ -1,5 +1,6 @@
 // TS attempt of http://www.complexification.net/gallery/machines/substrate/index.php by laniaung.me
 import State from "./state"
+import {Analogous, Monochromatic, SplitComplementary, Square, Tetradic, Triadic} from "./color-schemes"
 
 export default class Substrate {
     private readonly state: State
@@ -23,7 +24,25 @@ export default class Substrate {
             requestAnimationFrame(draw)
         }
 
-        setInterval(() => me.state.init(), 120 * 1000)
+        setInterval(() => me.state.init(me.getRandomColorScheme()), 30 * 1000)
         draw()
+    }
+
+    getRandomColorScheme(): number[] {
+        const color = Math.floor(Math.random() * Math.pow(256, 3))
+        switch (Math.floor(Math.random() * 6)) {
+            case 1:
+                return new Monochromatic(color).colors
+            case 2:
+                return new SplitComplementary(color).colors
+            case 3:
+                return new Triadic(color).colors
+            case 4:
+                return new Tetradic(color).colors
+            case 5:
+                return new Square(color).colors
+            default:
+                return new Analogous(color).colors
+        }
     }
 }

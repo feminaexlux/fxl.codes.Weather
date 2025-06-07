@@ -2,7 +2,7 @@ import Crack from "./crack"
 
 export default class State {
     readonly canvas: HTMLCanvasElement
-    readonly colors: number[]
+    colors: number[]
     readonly maxCracks: number
     readonly grid: number[][]
     seeds: {x: number, y: number}[]
@@ -19,7 +19,8 @@ export default class State {
         this.init()
     }
 
-    init() {
+    init(colors?: number[]) {
+        if (colors) this.colors = colors
         this.cracks.length = 0
         this.grid.length = 0
         this.seeds.length = 0

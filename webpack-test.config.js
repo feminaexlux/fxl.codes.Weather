@@ -1,7 +1,8 @@
 const path = require("path");
+const glob = require("glob");
 
 module.exports = {
-    entry: "./src/launch.ts",
+    entry: glob.sync("spec/**/*Spec.js?(x)"),
     module: {
         rules: [
             {
@@ -12,11 +13,11 @@ module.exports = {
         ],
     },
     resolve: {
-        extensions: [".tsx", ".ts", ".js"],
+        modules: [__dirname, "src", "node_modules"],
+        extensions: ["*", ".js", ".jsx", ".tsx", ".ts"],
     },
-    devtool: "source-map",
     output: {
-        filename: "main.js",
+        filename: "test.js",
         path: path.resolve(__dirname, "www"),
     },
 };

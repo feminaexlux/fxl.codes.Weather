@@ -1,5 +1,11 @@
 {
+  "scripts": {
+    "test-serve": "webpack --config webpack-test.config.js --mode development && jasmine-browser-runner"
+  },
   "devDependencies": {
+    "glob": "^11.0.2",
+    "jasmine-browser-runner": "^3.0.0",
+    "jasmine-core": "^5.8.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
     "webpack": "^5.99.9",

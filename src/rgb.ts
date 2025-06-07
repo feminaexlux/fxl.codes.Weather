@@ -49,4 +49,11 @@ export default class RGB {
 
         return new RGB((red + match) * 255, (green + match) * 255, (blue + match) * 255)
     }
+
+    public static fromHex(color: number): RGB {
+        const red = color >> 16
+        const green = (color - (red << 16)) >> 8
+        const blue = color - (red << 16) - (green << 8)
+        return new RGB(red, green, blue)
+    }
 }

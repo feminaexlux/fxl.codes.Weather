@@ -6,13 +6,13 @@ export default class RGB {
     blue: number
 
     constructor(red: number, green: number, blue: number) {
-        this.red = red
-        this.green = green
-        this.blue = blue
+        this.red = Math.floor(red < 0 ? 0 : red > 255 ? 255 : red)
+        this.green = Math.floor(green < 0 ? 0 : green > 255 ? 255 : green)
+        this.blue = Math.floor(blue < 0 ? 0 : blue > 255 ? 255 : blue)
     }
 
     toHex(): number {
-        return this.red << 16 + this.green << 8 + this.blue
+        return (this.red << 16) + (this.green << 8) + this.blue
     }
 
     // https://en.wikipedia.org/wiki/HSL_and_HSV
@@ -20,12 +20,10 @@ export default class RGB {
         let red = 0,
             green = 0,
             blue = 0
-        const saturationValue = hsl.saturation / 100,
-            lightnessValue = hsl.lightness / 100,
-            chroma = 1 - Math.abs(2 * hsl.lightness - 1) * saturationValue,
+        const chroma = (1 - Math.abs(2 * hsl.lightness - 1)) * hsl.saturation,
             range = hsl.hue / 60,
             intermediate = chroma * (1 - Math.abs(range % 2 - 1)),
-            match = lightnessValue - chroma / 2
+            match = hsl.lightness - chroma / 2
 
         if (range >= 0 && range < 1) {
             red = chroma

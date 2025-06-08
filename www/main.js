@@ -12,6 +12,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Analogous: () => (/* binding */ Analogous),
 /* harmony export */   Monochromatic: () => (/* binding */ Monochromatic),
+/* harmony export */   Scheme: () => (/* binding */ Scheme),
 /* harmony export */   SplitComplementary: () => (/* binding */ SplitComplementary),
 /* harmony export */   Square: () => (/* binding */ Square),
 /* harmony export */   Tetradic: () => (/* binding */ Tetradic),
@@ -34,30 +35,25 @@ var __extends = (undefined && undefined.__extends) || (function () {
     };
 })();
 
-/*
-export enum Scheme {
-    Analogous,
-    Monochromatic,
-    SplitComplementary,
-    Triadic,
-    Tetradic,
-    Square
-}
-*/
 var Scheme = /** @class */ (function () {
     function Scheme(initial) {
-        this.primary = _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL.fromHex(initial);
+        this.primary = _hsl__WEBPACK_IMPORTED_MODULE_0__["default"].fromHex(initial);
     }
+    Scheme.prototype.toString = function () {
+        var values = this.colors.map(function (color) { return color.toString(16); }).join(",");
+        return "".concat(this.constructor.name, ": ").concat(values);
+    };
     return Scheme;
 }());
+
 var Analogous = /** @class */ (function (_super) {
     __extends(Analogous, _super);
     function Analogous(initial) {
         var _this = _super.call(this, initial) || this;
-        var left1 = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue - 60, _this.primary.saturation, _this.primary.lightness);
-        var left2 = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue - 30, _this.primary.saturation, _this.primary.lightness);
-        var right1 = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 30, _this.primary.saturation, _this.primary.lightness);
-        var right2 = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 60, _this.primary.saturation, _this.primary.lightness);
+        var left1 = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue - 30, _this.primary.saturation, _this.primary.lightness);
+        var left2 = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue - 15, _this.primary.saturation, _this.primary.lightness);
+        var right1 = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 15, _this.primary.saturation, _this.primary.lightness);
+        var right2 = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 30, _this.primary.saturation, _this.primary.lightness);
         _this.colors = [
             left1.toHex(),
             left2.toHex(),
@@ -77,10 +73,10 @@ var Monochromatic = /** @class */ (function (_super) {
         var delta = _this.primary.lightness / 6;
         _this.colors = [
             initial,
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta).toHex(),
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 2).toHex(),
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 3).toHex(),
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 4).toHex()
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta).toHex(),
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 2).toHex(),
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 3).toHex(),
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue, _this.primary.saturation, _this.primary.lightness - delta * 4).toHex()
         ];
         return _this;
     }
@@ -91,11 +87,11 @@ var SplitComplementary = /** @class */ (function (_super) {
     __extends(SplitComplementary, _super);
     function SplitComplementary(initial) {
         var _this = _super.call(this, initial) || this;
-        var complement = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL((_this.primary.hue + 180) % 360, _this.primary.saturation, _this.primary.lightness);
+        var complement = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"]((_this.primary.hue + 180) % 360, _this.primary.saturation, _this.primary.lightness);
         _this.colors = [
             initial,
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(complement.hue - 30, complement.saturation, complement.lightness).toHex(),
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(complement.hue + 30, complement.saturation, complement.lightness).toHex()
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](complement.hue - 30, complement.saturation, complement.lightness).toHex(),
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](complement.hue + 30, complement.saturation, complement.lightness).toHex()
         ];
         return _this;
     }
@@ -108,8 +104,8 @@ var Triadic = /** @class */ (function (_super) {
         var _this = _super.call(this, initial) || this;
         _this.colors = [
             initial,
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue - 120, _this.primary.saturation, _this.primary.lightness).toHex(),
-            new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 120, _this.primary.saturation, _this.primary.lightness).toHex()
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue - 120, _this.primary.saturation, _this.primary.lightness).toHex(),
+            new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 120, _this.primary.saturation, _this.primary.lightness).toHex()
         ];
         return _this;
     }
@@ -120,9 +116,9 @@ var Tetradic = /** @class */ (function (_super) {
     __extends(Tetradic, _super);
     function Tetradic(initial) {
         var _this = _super.call(this, initial) || this;
-        var second = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 45, _this.primary.saturation, _this.primary.lightness);
-        var complement = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 180, _this.primary.saturation, _this.primary.lightness);
-        var secondComplement = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(second.hue + 180, _this.primary.saturation, _this.primary.lightness);
+        var second = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 45, _this.primary.saturation, _this.primary.lightness);
+        var complement = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 180, _this.primary.saturation, _this.primary.lightness);
+        var secondComplement = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](second.hue + 180, _this.primary.saturation, _this.primary.lightness);
         _this.colors = [
             initial,
             second.toHex(),
@@ -138,9 +134,9 @@ var Square = /** @class */ (function (_super) {
     __extends(Square, _super);
     function Square(initial) {
         var _this = _super.call(this, initial) || this;
-        var second = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 90, _this.primary.saturation, _this.primary.lightness);
-        var third = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(_this.primary.hue + 180, _this.primary.saturation, _this.primary.lightness);
-        var fourth = new _hsl__WEBPACK_IMPORTED_MODULE_0__.HSL(second.hue + 270, _this.primary.saturation, _this.primary.lightness);
+        var second = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 90, _this.primary.saturation, _this.primary.lightness);
+        var third = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](_this.primary.hue + 180, _this.primary.saturation, _this.primary.lightness);
+        var fourth = new _hsl__WEBPACK_IMPORTED_MODULE_0__["default"](second.hue + 270, _this.primary.saturation, _this.primary.lightness);
         _this.colors = [
             initial,
             second.toHex(),
@@ -226,7 +222,7 @@ var Crack = /** @class */ (function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   HSL: () => (/* binding */ HSL)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _rgb__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./rgb */ "./src/rgb.ts");
 
@@ -236,28 +232,29 @@ var HSL = /** @class */ (function () {
         this.saturation = saturation;
         this.lightness = lightness;
     }
-    // https://en.wikipedia.org/wiki/RGB_color_model
+    // https://en.wikipedia.org/wiki/HSL_and_HSV
     HSL.fromRgb = function (rgb) {
-        var redValue = rgb.red / 255, greenValue = rgb.green / 255, blueValue = rgb.blue / 255, lightness = (redValue + greenValue + blueValue) / 3, saturation = 1 - (3 / (redValue + greenValue + blueValue)) * Math.min(redValue, greenValue, blueValue);
-        var dividend = (redValue - greenValue) + (redValue - blueValue);
-        var divisor = 2 * Math.sqrt((redValue - greenValue) ^ 2 + (redValue - blueValue) * (greenValue - blueValue));
-        var hue = (1 / Math.cos(dividend / divisor));
-        if (greenValue > blueValue)
-            hue = 360 - hue;
-        return new HSL(hue, saturation, lightness);
+        var redValue = rgb.red / 255, greenValue = rgb.green / 255, blueValue = rgb.blue / 255, max = Math.max(redValue, greenValue, blueValue), min = Math.min(redValue, greenValue, blueValue), chroma = max - min, lightness = .5 * (max + min), saturation = 1 - (3 / (redValue + greenValue + blueValue)) * Math.min(redValue, greenValue, blueValue);
+        var huePrime = 0;
+        if (chroma != 0) {
+            if (redValue == max)
+                huePrime = ((greenValue - blueValue) / chroma) % 6;
+            else if (greenValue == max)
+                huePrime = ((blueValue - redValue) / chroma) + 2;
+            else
+                huePrime = ((redValue - greenValue) / chroma) + 4;
+        }
+        return new HSL(huePrime * 60, saturation, lightness);
     };
     HSL.fromHex = function (color) {
-        var red = color >> 16;
-        var green = (color - (red << 16)) >> 8;
-        var blue = color - (red << 16) - (green << 8);
-        return HSL.fromRgb(new _rgb__WEBPACK_IMPORTED_MODULE_0__.RGB(red, green, blue));
+        return HSL.fromRgb(_rgb__WEBPACK_IMPORTED_MODULE_0__["default"].fromHex(color));
     };
     HSL.prototype.toHex = function () {
-        return _rgb__WEBPACK_IMPORTED_MODULE_0__.RGB.fromHsl(this).toHex();
+        return _rgb__WEBPACK_IMPORTED_MODULE_0__["default"].fromHsl(this).toHex();
     };
     return HSL;
 }());
-
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (HSL);
 
 
 /***/ }),
@@ -270,21 +267,21 @@ var HSL = /** @class */ (function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   RGB: () => (/* binding */ RGB)
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 var RGB = /** @class */ (function () {
     function RGB(red, green, blue) {
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
+        this.red = Math.floor(red < 0 ? 0 : red > 255 ? 255 : red);
+        this.green = Math.floor(green < 0 ? 0 : green > 255 ? 255 : green);
+        this.blue = Math.floor(blue < 0 ? 0 : blue > 255 ? 255 : blue);
     }
     RGB.prototype.toHex = function () {
-        return this.red << 16 + this.green << 8 + this.blue;
+        return (this.red << 16) + (this.green << 8) + this.blue;
     };
     // https://en.wikipedia.org/wiki/HSL_and_HSV
     RGB.fromHsl = function (hsl) {
         var red = 0, green = 0, blue = 0;
-        var saturationValue = hsl.saturation / 100, lightnessValue = hsl.lightness / 100, chroma = 1 - Math.abs(2 * hsl.lightness - 1) * saturationValue, range = hsl.hue / 60, intermediate = chroma * (1 - Math.abs(range % 2 - 1)), match = lightnessValue - chroma / 2;
+        var chroma = (1 - Math.abs(2 * hsl.lightness - 1)) * hsl.saturation, range = hsl.hue / 60, intermediate = chroma * (1 - Math.abs(range % 2 - 1)), match = hsl.lightness - chroma / 2;
         if (range >= 0 && range < 1) {
             red = chroma;
             green = intermediate;
@@ -311,9 +308,15 @@ var RGB = /** @class */ (function () {
         }
         return new RGB((red + match) * 255, (green + match) * 255, (blue + match) * 255);
     };
+    RGB.fromHex = function (color) {
+        var red = color >> 16;
+        var green = (color - (red << 16)) >> 8;
+        var blue = color - (red << 16) - (green << 8);
+        return new RGB(red, green, blue);
+    };
     return RGB;
 }());
-
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RGB);
 
 
 /***/ }),
@@ -331,7 +334,7 @@ __webpack_require__.r(__webpack_exports__);
 var SandPainter = /** @class */ (function () {
     function SandPainter(crack) {
         this.crack = crack;
-        this.color = this.crack.state.getRandomColor();
+        this.color = this.crack.state.getNextColor();
         this.gain = Math.random() / 10;
     }
     SandPainter.prototype.render = function () {
@@ -387,10 +390,11 @@ __webpack_require__.r(__webpack_exports__);
 
 var State = /** @class */ (function () {
     function State(colors, maxCracks, canvas) {
+        this.colorIndex = 0;
         this.canvas = canvas;
-        this.colors = colors;
         this.maxCracks = maxCracks;
         this.grid = [];
+        this.colors = colors;
         this.cracks = [];
         this.seeds = [];
         this.init();
@@ -401,6 +405,7 @@ var State = /** @class */ (function () {
         this.cracks.length = 0;
         this.grid.length = 0;
         this.seeds.length = 0;
+        this.colorIndex = 0;
         var height = this.canvas.height;
         var width = this.canvas.width;
         var context = this.canvas.getContext("2d");
@@ -426,8 +431,8 @@ var State = /** @class */ (function () {
         var _a = this.getNewEntry(), x = _a.x, y = _a.y, angle = _a.angle;
         this.cracks.push(new _crack__WEBPACK_IMPORTED_MODULE_0__["default"](this, x, y, angle));
     };
-    State.prototype.getRandomColor = function () {
-        return this.colors[Math.floor(Math.random() * this.colors.length)];
+    State.prototype.getNextColor = function () {
+        return this.colors[this.colorIndex++ % this.colors.length];
     };
     State.prototype.isWithinBoundary = function (x, y) {
         return x >= 0 && x < this.canvas.width && y >= 0 && y < this.canvas.height;
@@ -493,25 +498,33 @@ var Substrate = /** @class */ (function () {
             }
             requestAnimationFrame(draw);
         };
-        setInterval(function () { return me.state.init(me.getRandomColorScheme()); }, 30 * 1000);
+        setInterval(function () { return me.state.init(me.getRandomColorScheme()); }, 120 * 1000);
         draw();
     };
     Substrate.prototype.getRandomColorScheme = function () {
         var color = Math.floor(Math.random() * Math.pow(256, 3));
+        var scheme;
         switch (Math.floor(Math.random() * 6)) {
             case 1:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Monochromatic(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Monochromatic(color);
+                break;
             case 2:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.SplitComplementary(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.SplitComplementary(color);
+                break;
             case 3:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Triadic(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Triadic(color);
+                break;
             case 4:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Tetradic(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Tetradic(color);
+                break;
             case 5:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Square(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Square(color);
+                break;
             default:
-                return new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Analogous(color).colors;
+                scheme = new _color_schemes__WEBPACK_IMPORTED_MODULE_1__.Analogous(color);
         }
+        console.info(scheme.toString());
+        return scheme.colors;
     };
     return Substrate;
 }());

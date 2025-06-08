@@ -7,7 +7,7 @@ export default class SandPainter {
 
     constructor(crack: Crack) {
         this.crack = crack
-        this.color = this.crack.state.getRandomColor()
+        this.color = this.crack.state.getNextColor()
         this.gain = Math.random() / 10
     }
 

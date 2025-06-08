@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "test-serve": "webpack --config webpack-test.config.js --mode development && jasmine-browser-runner"
+    "build": "webpack --mode development",
+    "test-serve": "webpack --config webpack-test.config.js --mode development && jasmine-browser-runner",
+    "test": "webpack --config webpack-test.config.js --mode development && jasmine-browser-runner runSpecs"
   },
   "devDependencies": {
     "glob": "^11.0.2",

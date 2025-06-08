@@ -1,22 +1,27 @@
 import HSL from "./hsl"
 
-abstract class Scheme {
+export abstract class Scheme {
     protected primary: HSL
+    colors: number[]
+
     protected constructor(initial: number) {
         this.primary = HSL.fromHex(initial)
     }
 
-    colors: number[]
+    toString(): string {
+        let values = this.colors.map(color => color.toString(16)).join(",")
+        return `${this.constructor.name}: ${values}`
+    }
 }
 
 export class Analogous extends Scheme {
     constructor(initial: number) {
         super(initial)
 
-        const left1 = new HSL(this.primary.hue - 60, this.primary.saturation, this.primary.lightness)
-        const left2 = new HSL(this.primary.hue - 30, this.primary.saturation, this.primary.lightness)
-        const right1 = new HSL(this.primary.hue + 30, this.primary.saturation, this.primary.lightness)
-        const right2 = new HSL(this.primary.hue + 60, this.primary.saturation, this.primary.lightness)
+        const left1 = new HSL(this.primary.hue - 30, this.primary.saturation, this.primary.lightness)
+        const left2 = new HSL(this.primary.hue - 15, this.primary.saturation, this.primary.lightness)
+        const right1 = new HSL(this.primary.hue + 15, this.primary.saturation, this.primary.lightness)
+        const right2 = new HSL(this.primary.hue + 30, this.primary.saturation, this.primary.lightness)
 
         this.colors = [
             left1.toHex(),

@@ -2,17 +2,18 @@ import Crack from "./crack"
 
 export default class State {
     readonly canvas: HTMLCanvasElement
-    colors: number[]
     readonly maxCracks: number
     readonly grid: number[][]
+    colors: number[]
     seeds: {x: number, y: number}[]
     cracks: Crack[]
+    colorIndex: number = 0
 
     constructor(colors: number[], maxCracks: number, canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.colors = colors
         this.maxCracks = maxCracks
         this.grid = []
+        this.colors = colors
         this.cracks = []
         this.seeds = []
 
@@ -24,6 +25,7 @@ export default class State {
         this.cracks.length = 0
         this.grid.length = 0
         this.seeds.length = 0
+        this.colorIndex = 0
 
         const height = this.canvas.height
         const width = this.canvas.width
@@ -55,8 +57,8 @@ export default class State {
         this.cracks.push(new Crack(this, x, y, angle))
     }
 
-    getRandomColor(): number {
-        return this.colors[Math.floor(Math.random() * this.colors.length)]
+    getNextColor(): number {
+        return this.colors[this.colorIndex++ % this.colors.length]
     }
 
     isWithinBoundary(x: number, y: number): boolean {

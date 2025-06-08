@@ -16,4 +16,11 @@ describe("RGB", () => {
             expect(value.green).toEqual(expected[index].green)
         })
     }
+
+    for (let index = 0; index < hexes.length; index++) {
+        it(`should return the same hex value: ${hexes[index].toString(16)}`, () => {
+            const value = expected[index].toHex()
+            expect(value).toEqual(hexes[index])
+        })
+    }
 })

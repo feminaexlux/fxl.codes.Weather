@@ -1,21 +1,52 @@
 import { fetchWeatherApi } from 'openmeteo'
 
 export default class Weather {
+    private readonly apiUrl = "https://api.open-meteo.com/v1/forecast"
     private readonly options: WeatherOptions
+    private readonly dailyVariables = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"]
+    private readonly hourlyVariables = ["temperature_2m", "precipitation", "precipitation_probability"]
+    private readonly currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"]
+    private lastFetched: LastFetched
+    current: CurrentWeather
+    hourly: HourlyWeather[] = []
+    daily: DailyWeather[] = []
 
     constructor(latitude?: number, longitude?: number) {
-        latitude ??= 47.61002138071677
-        longitude ??= -122.17906310779568
+        this.options = new WeatherOptions(latitude ?? 47.61002138071677, longitude ?? -122.17906310779568)
 
-        this.options = new WeatherOptions()
-        this.options = { ...this.options, latitude, longitude }
-
-        this.getWeather(this.options)
+        const me = this
+        me.getWeather().then(() => {
+        })
     }
 
-    async getWeather(options: WeatherOptions) {
-        const url = "https://api.open-meteo.com/v1/forecast"
-        const responses = await fetchWeatherApi(url, this.options)
+    async getWeather(): Promise<void> {
+        const me = this
+        const parameters: any = { ...me.options }
+
+        if (!me.lastFetched) {
+            parameters["daily"] = me.dailyVariables
+            parameters["hourly"] = me.hourlyVariables
+            parameters["current"] = me.currentVariables
+            me.lastFetched = new LastFetched()
+        } else {
+            // Reasonable-ish timers?
+            if (me.lastFetched.minutesSinceCurrent() > 15) {
+                parameters["current"] = me.currentVariables
+                me.lastFetched.current = new Date()
+            }
+
+            if (me.lastFetched.hoursSinceHourly() > 3) {
+                parameters["hourly"] = me.hourlyVariables
+                me.lastFetched.hourly = new Date()
+            }
+
+            if (me.lastFetched.hoursSinceDaily() > 8) {
+                parameters["daily"] = me.dailyVariables
+                me.lastFetched.daily = new Date()
+            }
+        }
+
+        const responses = await fetchWeatherApi(me.apiUrl, parameters)
 
         for (const response of responses) {
             // Attributes for timezone and location
@@ -73,6 +104,8 @@ export default class Weather {
                 },
             }
 
+            console.log(weatherData)
+
             // `weatherData` now contains a simple structure with arrays for datetime and weather data
             for (let i = 0; i < weatherData.hourly.time.length; i++) {
                 console.log(
@@ -102,13 +135,73 @@ export default class Weather {
 }
 
 class WeatherOptions {
-    latitude: number
-    longitude: number
-    daily: string[] = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"]
-    hourly: string[] = ["temperature_2m", "precipitation", "precipitation_probability"]
-    current: string[] = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"]
-    timezone: string = "America/Los_Angeles"
-    "wind_speed_unit": string = "mph"
-    "temperature_unit": string = "fahrenheit"
-    "precipitation_unit": string = "inch"
+    readonly latitude: number
+    readonly longitude: number
+    readonly timezone: string = "America/Los_Angeles"
+    "wind_speed_unit" = "mph"
+    "temperature_unit" = "fahrenheit"
+    "precipitation_unit" = "inch"
+
+    constructor(latitude: number, longitude: number, timezone = "America/Los_Angeles") {
+        this.latitude = latitude
+        this.longitude = longitude
+        this.timezone = timezone
+    }
+}
+
+class CurrentWeather {
+    time: Date
+    temperature: number
+    humidity: number
+    feelsLike: number
+    precipitation: number
+    windSpeed: number
+    windGusts: number
+    windDirection: number
+}
+
+class DailyWeather {
+    hoursOfPrecipitation: number
+    totalPrecipitation: number
+    sunrise: Date
+    sunset: Date
+    maxTemperature: number
+    minTemperature: number
+    maxUV: number
+    prominentWindDirection: number
+    maxWindGusts: number
+    maxWindSpeed: number
+    asOf: Date
+}
+
+class HourlyWeather {
+    time: Date
+    precipitation: number
+    precipitationProbability: number
+    temperature: number
+}
+
+class LastFetched {
+    current: Date
+    hourly: Date
+    daily: Date
+
+    constructor() {
+        const now = new Date()
+        this.current = now
+        this.hourly = now
+        this.daily = now
+    }
+
+    minutesSinceCurrent(): number {
+        return 0
+    }
+
+    hoursSinceHourly(): number {
+        return 0
+    }
+
+    hoursSinceDaily(): number {
+        return 0
+    }
 }

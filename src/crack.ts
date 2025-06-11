@@ -17,7 +17,7 @@ export default class Crack {
     start(x: number, y: number, angle: number) {
         this.x = x + .61 * Math.cos(angle * Math.PI / 180)
         this.y = y + .61 * Math.sin(angle * Math.PI / 180)
-        const flip = Math.random() < 0.5
+        const flip = Math.random() > 0.5
         this.angle = angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1)
     }
 

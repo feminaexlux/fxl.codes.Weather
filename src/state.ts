@@ -4,9 +4,20 @@ export default class State {
     readonly canvas: HTMLCanvasElement
     readonly maxCracks: number
     readonly grid: number[][]
+    readonly canvasColors = [
+        "rgb(27 27 27 / 90%)",
+        "rgb(90 90 90 / 90%)",
+        "rgb(126 126 126 / 90%)",
+        "rgb(180 180 180 / 90%)",
+        "rgb(255 255 255 / 90%)",
+        "rgb(180 180 180 / 90%)",
+        "rgb(126 126 126 / 90%)",
+        "rgb(90 90 90 / 90%)"
+    ]
     colors: number[]
     seeds: {x: number, y: number}[]
     cracks: Crack[]
+    canvasIndex: number = 0
     colorIndex: number = 0
 
     constructor(colors: number[], maxCracks: number, canvas: HTMLCanvasElement) {
@@ -30,7 +41,7 @@ export default class State {
         const height = this.canvas.height
         const width = this.canvas.width
         const context = this.canvas.getContext("2d")
-        context.fillStyle = "rgb(255 255 255 / 95%)"
+        context.fillStyle = this.canvasColors[this.canvasIndex++ % this.canvasColors.length]
         context.fillRect(0, 0, width, height)
 
         for (let x = 0; x < width; x++) {

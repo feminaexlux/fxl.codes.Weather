@@ -2309,91 +2309,122 @@ var __generator = (undefined && undefined.__generator) || function (thisArg, bod
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 
 var Weather = /** @class */ (function () {
     function Weather(latitude, longitude) {
-        latitude !== null && latitude !== void 0 ? latitude : (latitude = 47.61002138071677);
-        longitude !== null && longitude !== void 0 ? longitude : (longitude = -122.17906310779568);
-        this.options = new WeatherOptions();
-        this.options = __assign(__assign({}, this.options), { latitude: latitude, longitude: longitude });
-        this.getWeather().then(function () {
-        });
+        this.apiUrl = "https://api.open-meteo.com/v1/forecast";
+        this.dailyVariables = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"];
+        this.hourlyVariables = ["temperature_2m", "precipitation", "precipitation_probability"];
+        this.currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"];
+        this.hourly = [];
+        this.daily = [];
+        this.options = new WeatherOptions(latitude !== null && latitude !== void 0 ? latitude : 47.61002138071677, longitude !== null && longitude !== void 0 ? longitude : -122.17906310779568);
+        var me = this;
+        setInterval(function () { return me.getWeather(); }, 60 * 1000);
+        me.getWeather();
     }
     Weather.prototype.getWeather = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var url, responses, _loop_1, _i, responses_1, response;
+            var me, parameters, getData, responses, _i, responses_1, response, utcOffsetSeconds, current, hourly, daily, length_1, temperatures, precipitationTotals, precipitationProbabilities, i, length_2, maxTemperatures, minTemperatures, sunrise, sunset, maxUVs, precipitationTotals, precipitationHours, maxWindSpeeds, maxWindGusts, prominentWindDirections, i;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        url = "https://api.open-meteo.com/v1/forecast";
-                        return [4 /*yield*/, (0,openmeteo__WEBPACK_IMPORTED_MODULE_0__.fetchWeatherApi)(url, this.options)];
+                        me = this;
+                        parameters = __assign({}, me.options);
+                        getData = false;
+                        if (!me.lastFetched) {
+                            parameters["daily"] = me.dailyVariables;
+                            parameters["hourly"] = me.hourlyVariables;
+                            parameters["current"] = me.currentVariables;
+                            me.lastFetched = new LastFetched();
+                            getData = true;
+                        }
+                        else {
+                            // Reasonable-ish timers?
+                            if (me.lastFetched.minutesSinceCurrent() > 15) {
+                                parameters["current"] = me.currentVariables;
+                                me.lastFetched.current = new Date();
+                                getData = true;
+                            }
+                            if (me.lastFetched.hoursSinceHourly() > 3) {
+                                parameters["hourly"] = me.hourlyVariables;
+                                me.lastFetched.hourly = new Date();
+                                getData = true;
+                            }
+                            if (me.lastFetched.hoursSinceDaily() > 8) {
+                                parameters["daily"] = me.dailyVariables;
+                                me.lastFetched.daily = new Date();
+                                getData = true;
+                            }
+                        }
+                        if (!getData)
+                            return [2 /*return*/];
+                        return [4 /*yield*/, (0,openmeteo__WEBPACK_IMPORTED_MODULE_0__.fetchWeatherApi)(me.apiUrl, parameters)];
                     case 1:
                         responses = _a.sent();
-                        _loop_1 = function (response) {
-                            // Attributes for timezone and location
-                            var utcOffsetSeconds = response.utcOffsetSeconds();
-                            var timezone = response.timezone();
-                            var timezoneAbbreviation = response.timezoneAbbreviation();
-                            var latitude = response.latitude();
-                            var longitude = response.longitude();
-                            var current = response.current();
-                            var hourly = response.hourly();
-                            var daily = response.daily();
-                            var sunrise = daily.variables(2);
-                            var sunset = daily.variables(3);
-                            // Note: The order of weather variables in the URL query and the indices below need to match!
-                            var weatherData = {
-                                current: {
-                                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
-                                    temperature2m: current.variables(0).value(),
-                                    relativeHumidity2m: current.variables(1).value(),
-                                    apparentTemperature: current.variables(2).value(),
-                                    precipitation: current.variables(3).value(),
-                                    windSpeed10m: current.variables(4).value(),
-                                    windGusts10m: current.variables(5).value(),
-                                    windDirection10m: current.variables(6).value(),
-                                },
-                                hourly: {
-                                    time: __spreadArray([], Array((Number(hourly.timeEnd()) - Number(hourly.time())) / hourly.interval()), true).map(function (_, i) { return new Date((Number(hourly.time()) + i * hourly.interval() + utcOffsetSeconds) * 1000); }),
-                                    temperature2m: hourly.variables(0).valuesArray(),
-                                    precipitation: hourly.variables(1).valuesArray(),
-                                    precipitationProbability: hourly.variables(2).valuesArray(),
-                                },
-                                daily: {
-                                    time: __spreadArray([], Array((Number(daily.timeEnd()) - Number(daily.time())) / daily.interval()), true).map(function (_, i) { return new Date((Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) * 1000); }),
-                                    temperature2mMax: daily.variables(0).valuesArray(),
-                                    temperature2mMin: daily.variables(1).valuesArray(),
-                                    sunrise: __spreadArray([], Array(sunrise.valuesInt64Length()), true).map(function (_, i) { return new Date((Number(sunrise.valuesInt64(i)) + utcOffsetSeconds) * 1000); }),
-                                    sunset: __spreadArray([], Array(sunset.valuesInt64Length()), true).map(function (_, i) { return new Date((Number(sunset.valuesInt64(i)) + utcOffsetSeconds) * 1000); }),
-                                    uvIndexMax: daily.variables(4).valuesArray(),
-                                    precipitationSum: daily.variables(5).valuesArray(),
-                                    precipitationHours: daily.variables(6).valuesArray(),
-                                    windSpeed10mMax: daily.variables(7).valuesArray(),
-                                    windGusts10mMax: daily.variables(8).valuesArray(),
-                                    windDirection10mDominant: daily.variables(9).valuesArray(),
-                                },
-                            };
-                            console.log(weatherData);
-                            // `weatherData` now contains a simple structure with arrays for datetime and weather data
-                            for (var i = 0; i < weatherData.hourly.time.length; i++) {
-                                console.log(weatherData.hourly.time[i].toISOString(), weatherData.hourly.temperature2m[i], weatherData.hourly.precipitation[i], weatherData.hourly.precipitationProbability[i]);
-                            }
-                            for (var i = 0; i < weatherData.daily.time.length; i++) {
-                                console.log(weatherData.daily.time[i].toISOString(), weatherData.daily.temperature2mMax[i], weatherData.daily.temperature2mMin[i], weatherData.daily.sunrise[i].toISOString(), weatherData.daily.sunset[i].toISOString(), weatherData.daily.uvIndexMax[i], weatherData.daily.precipitationSum[i], weatherData.daily.precipitationHours[i], weatherData.daily.windSpeed10mMax[i], weatherData.daily.windGusts10mMax[i], weatherData.daily.windDirection10mDominant[i]);
-                            }
-                        };
                         for (_i = 0, responses_1 = responses; _i < responses_1.length; _i++) {
                             response = responses_1[_i];
-                            _loop_1(response);
+                            utcOffsetSeconds = response.utcOffsetSeconds();
+                            current = response.current();
+                            hourly = response.hourly();
+                            daily = response.daily();
+                            if (current != null) {
+                                me.current = {
+                                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                                    temperature: current.variables(0).value(),
+                                    humidity: current.variables(1).value(),
+                                    feelsLike: current.variables(2).value(),
+                                    precipitation: current.variables(3).value(),
+                                    windSpeed: current.variables(4).value(),
+                                    windGusts: current.variables(5).value(),
+                                    windDirection: current.variables(6).value()
+                                };
+                            }
+                            if (hourly != null) {
+                                length_1 = Number(hourly.timeEnd() - hourly.time()) / hourly.interval();
+                                temperatures = hourly.variables(0).valuesArray();
+                                precipitationTotals = hourly.variables(1).valuesArray();
+                                precipitationProbabilities = hourly.variables(2).valuesArray();
+                                me.hourly.length = 0;
+                                for (i = 0; i < length_1; i++) {
+                                    me.hourly.push({
+                                        time: new Date((Number(hourly.time()) + i * hourly.interval() + utcOffsetSeconds) * 1000),
+                                        temperature: temperatures[i],
+                                        precipitation: precipitationTotals[i],
+                                        precipitationProbability: precipitationProbabilities[i]
+                                    });
+                                }
+                            }
+                            if (daily != null) {
+                                length_2 = Number(daily.timeEnd() - daily.time()) / daily.interval();
+                                maxTemperatures = daily.variables(0).valuesArray();
+                                minTemperatures = daily.variables(1).valuesArray();
+                                sunrise = daily.variables(2);
+                                sunset = daily.variables(3);
+                                maxUVs = daily.variables(4).valuesArray();
+                                precipitationTotals = daily.variables(5).valuesArray();
+                                precipitationHours = daily.variables(6).valuesArray();
+                                maxWindSpeeds = daily.variables(7).valuesArray();
+                                maxWindGusts = daily.variables(8).valuesArray();
+                                prominentWindDirections = daily.variables(9).valuesArray();
+                                me.daily.length = 0;
+                                for (i = 0; i < length_2; i++) {
+                                    me.daily.push({
+                                        time: new Date((Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) * 1000),
+                                        maxTemperature: maxTemperatures[i],
+                                        minTemperature: minTemperatures[i],
+                                        sunrise: new Date((Number(sunrise.valuesInt64(i)) + utcOffsetSeconds) * 1000),
+                                        sunset: new Date((Number(sunset.valuesInt64(i)) + utcOffsetSeconds) * 1000),
+                                        maxUV: maxUVs[i],
+                                        totalPrecipitation: precipitationTotals[i],
+                                        hoursOfPrecipitation: precipitationHours[i],
+                                        maxWindSpeed: maxWindSpeeds[i],
+                                        maxWindGusts: maxWindGusts[i],
+                                        prominentWindDirection: prominentWindDirections[i]
+                                    });
+                                }
+                            }
+                            console.log(me);
                         }
                         return [2 /*return*/];
                 }
@@ -2404,26 +2435,34 @@ var Weather = /** @class */ (function () {
 }());
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Weather);
 var WeatherOptions = /** @class */ (function () {
-    function WeatherOptions() {
-        this.daily = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"];
-        this.hourly = ["temperature_2m", "precipitation", "precipitation_probability"];
-        this.current = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"];
+    function WeatherOptions(latitude, longitude, timezone) {
+        if (timezone === void 0) { timezone = "America/Los_Angeles"; }
         this.timezone = "America/Los_Angeles";
         this["wind_speed_unit"] = "mph";
         this["temperature_unit"] = "fahrenheit";
         this["precipitation_unit"] = "inch";
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timezone = timezone;
     }
     return WeatherOptions;
 }());
-var WeatherData = /** @class */ (function () {
-    function WeatherData() {
+var LastFetched = /** @class */ (function () {
+    function LastFetched() {
+        this.current = new Date();
+        this.hourly = new Date();
+        this.daily = new Date();
     }
-    return WeatherData;
-}());
-var CurrentWeather = /** @class */ (function () {
-    function CurrentWeather() {
-    }
-    return CurrentWeather;
+    LastFetched.prototype.minutesSinceCurrent = function () {
+        return (new Date().getTime() - this.current.getTime()) / 60000;
+    };
+    LastFetched.prototype.hoursSinceHourly = function () {
+        return (new Date().getTime() - this.hourly.getTime()) / 3600000;
+    };
+    LastFetched.prototype.hoursSinceDaily = function () {
+        return (new Date().getTime() - this.daily.getTime()) / 3600000;
+    };
+    return LastFetched;
 }());
 
 

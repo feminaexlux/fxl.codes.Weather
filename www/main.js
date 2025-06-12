@@ -2315,15 +2315,15 @@ var Weather = /** @class */ (function () {
         this.apiUrl = "https://api.open-meteo.com/v1/forecast";
         this.dailyVariables = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"];
         this.hourlyVariables = ["temperature_2m", "precipitation", "precipitation_probability"];
-        this.currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"];
+        this.currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m", "cloud_cover"];
         this.hourly = [];
         this.daily = [];
         this.options = new WeatherOptions(latitude !== null && latitude !== void 0 ? latitude : 47.61002138071677, longitude !== null && longitude !== void 0 ? longitude : -122.17906310779568);
         var me = this;
-        setInterval(function () { return me.getWeather(); }, 60 * 1000);
-        me.getWeather();
+        setInterval(function () { return me.fetchWeather().then(function () { return me.setDisplay(); }); }, 60 * 1000);
+        me.fetchWeather().then(function () { return me.setDisplay(); });
     }
-    Weather.prototype.getWeather = function () {
+    Weather.prototype.fetchWeather = function () {
         return __awaiter(this, void 0, void 0, function () {
             var me, parameters, getData, responses, _i, responses_1, response, utcOffsetSeconds, current, hourly, daily, length_1, temperatures, precipitationTotals, precipitationProbabilities, i, length_2, maxTemperatures, minTemperatures, sunrise, sunset, maxUVs, precipitationTotals, precipitationHours, maxWindSpeeds, maxWindGusts, prominentWindDirections, i;
             return __generator(this, function (_a) {
@@ -2370,14 +2370,15 @@ var Weather = /** @class */ (function () {
                             daily = response.daily();
                             if (current != null) {
                                 me.current = {
-                                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                                    time: new Date(Number(current.time()) * 1000),
                                     temperature: current.variables(0).value(),
                                     humidity: current.variables(1).value(),
                                     feelsLike: current.variables(2).value(),
                                     precipitation: current.variables(3).value(),
                                     windSpeed: current.variables(4).value(),
                                     windGusts: current.variables(5).value(),
-                                    windDirection: current.variables(6).value()
+                                    windDirection: current.variables(6).value(),
+                                    cloudCoverage: current.variables(7).value()
                                 };
                             }
                             if (hourly != null) {
@@ -2410,11 +2411,11 @@ var Weather = /** @class */ (function () {
                                 me.daily.length = 0;
                                 for (i = 0; i < length_2; i++) {
                                     me.daily.push({
-                                        time: new Date((Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) * 1000),
+                                        time: new Date((Number(daily.time()) + i * daily.interval()) * 1000),
                                         maxTemperature: maxTemperatures[i],
                                         minTemperature: minTemperatures[i],
-                                        sunrise: new Date((Number(sunrise.valuesInt64(i)) + utcOffsetSeconds) * 1000),
-                                        sunset: new Date((Number(sunset.valuesInt64(i)) + utcOffsetSeconds) * 1000),
+                                        sunrise: new Date((Number(sunrise.valuesInt64(i))) * 1000),
+                                        sunset: new Date((Number(sunset.valuesInt64(i))) * 1000),
                                         maxUV: maxUVs[i],
                                         totalPrecipitation: precipitationTotals[i],
                                         hoursOfPrecipitation: precipitationHours[i],
@@ -2424,12 +2425,40 @@ var Weather = /** @class */ (function () {
                                     });
                                 }
                             }
-                            console.log(me);
                         }
                         return [2 /*return*/];
                 }
             });
         });
+    };
+    Weather.prototype.setDisplay = function () {
+        var panel = document.getElementById("weather-panel");
+        if (!panel) {
+            panel = document.createElement("main");
+            panel.id = "weather-panel";
+            document.body.appendChild(panel);
+        }
+        while (panel.firstChild)
+            panel.removeChild(panel.firstChild);
+        var currentSection = document.createElement("section");
+        currentSection.id = "current-section";
+        panel.appendChild(currentSection);
+        this.setDisplayCurrent(currentSection);
+    };
+    Weather.prototype.setDisplayCurrent = function (section) {
+        var header = document.createElement("header");
+        header.textContent = "Current";
+        section.appendChild(header);
+        var list = document.createElement("dl");
+        for (var _i = 0, _a = Object.keys(this.current); _i < _a.length; _i++) {
+            var key = _a[_i];
+            var term = document.createElement("dt");
+            term.textContent = key;
+            var value = document.createElement("dd");
+            value.textContent = this.current[key];
+            list.append(term, value);
+        }
+        section.appendChild(list);
     };
     return Weather;
 }());

@@ -5,7 +5,7 @@ export default class Weather {
     private readonly options: WeatherOptions
     private readonly dailyVariables = ["temperature_2m_max", "temperature_2m_min", "sunrise", "sunset", "uv_index_max", "precipitation_sum", "precipitation_hours", "wind_speed_10m_max", "wind_gusts_10m_max", "wind_direction_10m_dominant"]
     private readonly hourlyVariables = ["temperature_2m", "precipitation", "precipitation_probability"]
-    private readonly currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m"]
+    private readonly currentVariables = ["temperature_2m", "relative_humidity_2m", "apparent_temperature", "precipitation", "wind_speed_10m", "wind_gusts_10m", "wind_direction_10m", "cloud_cover"]
     private lastFetched: LastFetched
     current: CurrentWeather
     hourly: HourlyWeather[] = []
@@ -15,11 +15,11 @@ export default class Weather {
         this.options = new WeatherOptions(latitude ?? 47.61002138071677, longitude ?? -122.17906310779568)
 
         const me = this
-        setInterval(() => me.getWeather().then(() => me.setDisplay()), 60 * 1000)
-        me.getWeather().then(() => me.setDisplay())
+        setInterval(() => me.fetchWeather().then(() => me.setDisplay()), 60 * 1000)
+        me.fetchWeather().then(() => me.setDisplay())
     }
 
-    async getWeather(): Promise<void> {
+    async fetchWeather(): Promise<void> {
         const me = this
         const parameters: any = { ...me.options }
         let getData = false
@@ -62,14 +62,15 @@ export default class Weather {
 
             if (current != null) {
                 me.current = {
-                    time: new Date((Number(current.time()) + utcOffsetSeconds) * 1000),
+                    time: new Date(Number(current.time()) * 1000),
                     temperature: current.variables(0)!.value(),
                     humidity: current.variables(1)!.value(),
                     feelsLike: current.variables(2)!.value(),
                     precipitation: current.variables(3)!.value(),
                     windSpeed: current.variables(4)!.value(),
                     windGusts: current.variables(5)!.value(),
-                    windDirection: current.variables(6)!.value()
+                    windDirection: current.variables(6)!.value(),
+                    cloudCoverage: current.variables(7)!.value()
                 }
             }
 
@@ -107,11 +108,11 @@ export default class Weather {
 
                 for (let i = 0; i < length; i++) {
                     me.daily.push({
-                        time: new Date((Number(daily.time()) + i * daily.interval() + utcOffsetSeconds) * 1000),
+                        time: new Date((Number(daily.time()) + i * daily.interval()) * 1000),
                         maxTemperature: maxTemperatures[i],
                         minTemperature: minTemperatures[i],
-                        sunrise: new Date((Number(sunrise.valuesInt64(i)) + utcOffsetSeconds) * 1000),
-                        sunset: new Date((Number(sunset.valuesInt64(i)) + utcOffsetSeconds) * 1000),
+                        sunrise: new Date((Number(sunrise.valuesInt64(i))) * 1000),
+                        sunset: new Date((Number(sunset.valuesInt64(i))) * 1000),
                         maxUV: maxUVs[i],
                         totalPrecipitation: precipitationTotals[i],
                         hoursOfPrecipitation: precipitationHours[i],
@@ -121,8 +122,6 @@ export default class Weather {
                     })
                 }
             }
-
-            console.log(me)
         }
     }
 
@@ -143,7 +142,23 @@ export default class Weather {
     }
 
     private setDisplayCurrent(section: HTMLElement) {
+        const header = document.createElement("header")
+        header.textContent = "Current"
 
+        section.appendChild(header)
+
+        const list = document.createElement("dl")
+        for (let key of Object.keys(this.current)) {
+            const term = document.createElement("dt")
+            term.textContent = key
+
+            const value = document.createElement("dd")
+            value.textContent = (this.current as any)[key]
+
+            list.append(term, value)
+        }
+
+        section.appendChild(list)
     }
 }
 
@@ -171,6 +186,7 @@ interface CurrentWeather {
     windSpeed: number
     windGusts: number
     windDirection: number
+    cloudCoverage: number
 }
 
 interface DailyWeather {

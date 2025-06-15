@@ -1,5 +1,12 @@
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  src: url("./fonts/MaterialSymbolsOutlined[FILL,GRAD,opsz,wght].woff2") format("woff");
+}
+
 html,
 body {
+  font-size: 24px;
   height: 100%;
   margin: 0;
   overflow: hidden;
@@ -12,8 +19,8 @@ body {
     font-family: Verdana, sans-serif;
     font-weight: bold;
     height: 500px;
-    left: calc(50% - 250px);
-    padding: 40px;
+    left: calc(50% - 275px);
+    padding: 25px;
     position: absolute;
     text-shadow: #000 1px 1px,
       #000 -1px 1px,
@@ -23,9 +30,32 @@ body {
     width: 500px;
     z-index: 10;
 
+    .material {
+      font-family: "Material Symbols Outlined";
+      font-weight: normal;
+      font-style: normal;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+      vertical-align: text-bottom;
+    }
+
     @supports (-webkit-text-stroke: 1px #000) {
       -webkit-text-stroke: 1px #000;
       -webkit-text-fill-color: #fff;
+    }
+
+    #time {
+      font-size: 3rem;
+      text-align: center;
+    }
+
+    section header {
+      font-size: 1.5rem;
     }
   }
 }

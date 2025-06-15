@@ -15,8 +15,12 @@ export default class Weather {
     constructor(latitude?: number, longitude?: number) {
         this.options = new WeatherOptions(latitude ?? 47.61002138071677, longitude ?? -122.17906310779568)
 
+        const time = document.getElementById("time")
+        time.textContent = new Date().toLocaleTimeString("en-US", { hour12: false, timeStyle: "short" })
+        setInterval(() => time.textContent = new Date().toLocaleTimeString("en-US", { hour12: false, timeStyle: "short" }), 15000)
+
         const me = this
-        setInterval(() => me.fetchWeather().then(() => me.setDisplay()), 60000)
+        setInterval(() => me.fetchWeather().then(() => me.setDisplay()), 300000)
         me.fetchWeather().then(() => me.setDisplay())
     }
 
@@ -47,7 +51,7 @@ export default class Weather {
             return true
         } else {
             // Weather data is updated :00, :15, :30, :45 so wait at least a minute
-            if (me.lastFetched.current.getMinutes() % 15 < 5) {
+            if (me.lastFetched.current.getMinutes() % 15 >= 1 && me.lastFetched.current.getMinutes() % 15 < 6) {
                 const now = new Date()
                 // Make sure data is over 5 minutes old at least
                 if ((now.getTime() - me.lastFetched.current.getTime()) > 300000) {
@@ -138,24 +142,17 @@ export default class Weather {
     }
 
     private setDisplay() {
-        let panel = document.getElementById("weather-panel")
-        if (!panel) {
-            panel = document.createElement("main")
-            panel.id = "weather-panel"
-            document.body.appendChild(panel)
-        }
-
-        while (panel.firstChild) panel.removeChild(panel.firstChild)
-        this.setDisplayCurrent(panel)
+        const current = document.getElementById("current")
+        current.innerHTML = `<header title="Temperature (feels like)"><span class="material">thermostat</span>${Math.round(this.current.temperature)} (${Math.round(this.current.feelsLike)})</header>
+<main>
+    <div><span class="material">water_drop</span> ${Math.round(this.current.humidity)}%</div>
+    <div><span class="material">cloud</span> ${Math.round(this.current.cloudCoverage)}%</div>
+    <div><span class="material">weather_mix</span> ${Math.round(this.current.precipitation)}%</div>
+    <div><span class="material">air</span> ${Math.round(this.current.windSpeed)} (${Math.round(this.current.windGusts)}) ${this.inCardinals(this.current.windDirection)}</div>
+</main>`
     }
 
-    private setDisplayCurrent(panel: HTMLElement) {
-        const currentSection = document.createElement("section")
-        currentSection.id = "current-section"
-        panel.appendChild(currentSection)
-    }
-
-    private InCardinals(direction: number): string {
+    private inCardinals(direction: number): string {
         if (direction > 337.5 || direction <= 22.5) return "N"
         if (direction > 22.5 || direction <= 67.5) return "NE"
         if (direction > 67.5 || direction <= 112.5) return "E"

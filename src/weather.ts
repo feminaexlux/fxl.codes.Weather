@@ -27,8 +27,10 @@ export default class Weather {
     async fetchWeather(): Promise<void> {
         const me = this
         const parameters: any = { ...me.options }
-        if (!me.doFetchData(parameters)) return
+        const needsUpdate = me.needsUpdate(parameters)
+        if (!needsUpdate) return
 
+        console.info("Getting weather", parameters)
         const responses = await fetchWeatherApi(me.apiUrl, parameters)
         for (const response of responses) {
             const current = response.current()
@@ -41,7 +43,7 @@ export default class Weather {
         }
     }
 
-    private doFetchData(parameters: any): boolean {
+    private needsUpdate(parameters: any): boolean {
         const me = this
         if (!me.lastFetched) {
             parameters["daily"] = me.dailyVariables
@@ -50,8 +52,8 @@ export default class Weather {
             me.lastFetched = new LastFetched()
             return true
         } else {
-            // Weather data is updated :00, :15, :30, :45 so wait at least a minute
-            if (me.lastFetched.current.getMinutes() % 15 >= 1 && me.lastFetched.current.getMinutes() % 15 < 6) {
+            // Weather data is updated every 15 minutes starting at :00 but just wait 15 minutes for an update
+            if (me.lastFetched.minutesSinceCurrent() >= 15) {
                 const now = new Date()
                 // Make sure data is over 5 minutes old at least
                 if ((now.getTime() - me.lastFetched.current.getTime()) > 300000) {
@@ -218,11 +220,15 @@ class LastFetched {
     hourly: Date = new Date()
     daily: Date = new Date()
 
+    minutesSinceCurrent(): number {
+        return Math.floor((new Date().getTime() - this.current.getTime()) / 60000)
+    }
+
     hoursSinceHourly(): number {
-        return (new Date().getTime() - this.hourly.getTime()) / 3600000
+        return Math.floor((new Date().getTime() - this.hourly.getTime()) / 3600000)
     }
 
     hoursSinceDaily(): number {
-        return (new Date().getTime() - this.daily.getTime()) / 3600000
+        return Math.floor((new Date().getTime() - this.daily.getTime()) / 3600000)
     }
 }

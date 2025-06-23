@@ -15,18 +15,20 @@ export default class Crack {
     }
 
     start(x: number, y: number, angle: number) {
+        const random = crypto.getRandomValues(new Uint8Array(2))
         this.x = x + .61 * Math.cos(angle * Math.PI / 180)
         this.y = y + .61 * Math.sin(angle * Math.PI / 180)
-        const flip = Math.random() > 0.5
-        this.angle = angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1)
+        const flip = (random[0] / 256) > 0.5
+        this.angle = angle + (90 + Math.floor((random[1] / 256) * 4.1 - 2)) * (flip ? -1 : 1)
     }
 
     draw() {
+        const random = crypto.getRandomValues(new Uint8Array(2))
         this.x += .42 * Math.cos(this.angle * Math.PI / 180)
         this.y += .42 * Math.sin(this.angle * Math.PI / 180)
 
-        const fuzzX = this.x + (Math.random() * .66 - .33)
-        const fuzzY = this.y + (Math.random() * .66 - .33)
+        const fuzzX = this.x + (random[0] / 256 * .66 - .33)
+        const fuzzY = this.y + (random[1] / 256 * .66 - .33)
 
         const context = this.state.canvas.getContext("2d")
         context.fillStyle = "#000"

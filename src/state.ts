@@ -52,10 +52,11 @@ export default class State {
             }
         }
 
-        for (let i = 0; i < 3; i++) {
-            const x = Math.floor(Math.random() * width)
-            const y = Math.floor(Math.random() * height)
-            const angle = Math.floor(Math.random() * 360)
+        const random = crypto.getRandomValues(new Uint8Array(9))
+        for (let i = 0; i < 9; i += 3) {
+            const x = Math.floor(random[i] * width / 256)
+            const y = Math.floor(random[i + 1] * height / 256)
+            const angle = Math.floor(random[i + 2] * 360 / 256)
             this.cracks.push(new Crack(this, x, y, angle))
             this.grid[x][y] = angle
         }
@@ -77,20 +78,21 @@ export default class State {
     }
 
     getNewEntry(): {x: number, y: number, angle: number} {
+        const random = crypto.getRandomValues(new Uint8Array(4))
         if (!this.seeds.length) {
-            const x = Math.floor(Math.random() * this.canvas.width)
-            const y = Math.floor(Math.random() * this.canvas.height)
+            const x = Math.floor(random[0] * this.canvas.width / 256)
+            const y = Math.floor(random[1] * this.canvas.height / 256)
             let angle = this.grid[x][y]
 
             if (angle > 10000) {
-                angle = Math.floor(Math.random() * 360)
+                angle = Math.floor(random[2] * 360 / 256)
                 this.grid[x][y] = angle
             }
 
             return {x, y, angle}
         }
 
-        const randomIndex = Math.floor(Math.random() * this.seeds.length)
+        const randomIndex = Math.floor(random[3] * this.seeds.length / 256)
         const entry = this.seeds.splice(randomIndex, 1)[0]
         return {
             x: entry.x,

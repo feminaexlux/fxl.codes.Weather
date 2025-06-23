@@ -1880,16 +1880,18 @@ var Crack = /** @class */ (function () {
         this.start(x, y, angle);
     }
     Crack.prototype.start = function (x, y, angle) {
+        var random = crypto.getRandomValues(new Uint8Array(2));
         this.x = x + .61 * Math.cos(angle * Math.PI / 180);
         this.y = y + .61 * Math.sin(angle * Math.PI / 180);
-        var flip = Math.random() > 0.5;
-        this.angle = angle + (90 + Math.floor(Math.random() * 4.1 - 2)) * (flip ? -1 : 1);
+        var flip = (random[0] / 256) > 0.5;
+        this.angle = angle + (90 + Math.floor((random[1] / 256) * 4.1 - 2)) * (flip ? -1 : 1);
     };
     Crack.prototype.draw = function () {
+        var random = crypto.getRandomValues(new Uint8Array(2));
         this.x += .42 * Math.cos(this.angle * Math.PI / 180);
         this.y += .42 * Math.sin(this.angle * Math.PI / 180);
-        var fuzzX = this.x + (Math.random() * .66 - .33);
-        var fuzzY = this.y + (Math.random() * .66 - .33);
+        var fuzzX = this.x + (random[0] / 256 * .66 - .33);
+        var fuzzY = this.y + (random[1] / 256 * .66 - .33);
         var context = this.state.canvas.getContext("2d");
         context.fillStyle = "#000";
         context.fillRect(fuzzX, fuzzY, 1, 1);
@@ -2134,10 +2136,11 @@ var State = /** @class */ (function () {
                 this.grid[x][y] = 10001;
             }
         }
-        for (var i = 0; i < 3; i++) {
-            var x = Math.floor(Math.random() * width);
-            var y = Math.floor(Math.random() * height);
-            var angle = Math.floor(Math.random() * 360);
+        var random = crypto.getRandomValues(new Uint8Array(9));
+        for (var i = 0; i < 9; i += 3) {
+            var x = Math.floor(random[i] * width / 256);
+            var y = Math.floor(random[i + 1] * height / 256);
+            var angle = Math.floor(random[i + 2] * 360 / 256);
             this.cracks.push(new _crack__WEBPACK_IMPORTED_MODULE_0__["default"](this, x, y, angle));
             this.grid[x][y] = angle;
         }
@@ -2155,17 +2158,18 @@ var State = /** @class */ (function () {
         return x >= 0 && x < this.canvas.width && y >= 0 && y < this.canvas.height;
     };
     State.prototype.getNewEntry = function () {
+        var random = crypto.getRandomValues(new Uint8Array(4));
         if (!this.seeds.length) {
-            var x = Math.floor(Math.random() * this.canvas.width);
-            var y = Math.floor(Math.random() * this.canvas.height);
+            var x = Math.floor(random[0] * this.canvas.width / 256);
+            var y = Math.floor(random[1] * this.canvas.height / 256);
             var angle = this.grid[x][y];
             if (angle > 10000) {
-                angle = Math.floor(Math.random() * 360);
+                angle = Math.floor(random[2] * 360 / 256);
                 this.grid[x][y] = angle;
             }
             return { x: x, y: y, angle: angle };
         }
-        var randomIndex = Math.floor(Math.random() * this.seeds.length);
+        var randomIndex = Math.floor(random[3] * this.seeds.length / 256);
         var entry = this.seeds.splice(randomIndex, 1)[0];
         return {
             x: entry.x,
@@ -2328,14 +2332,16 @@ var Weather = /** @class */ (function () {
     }
     Weather.prototype.fetchWeather = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var me, parameters, responses, _i, responses_1, response, current, hourly, daily;
+            var me, parameters, needsUpdate, responses, _i, responses_1, response, current, hourly, daily;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         me = this;
                         parameters = __assign({}, me.options);
-                        if (!me.doFetchData(parameters))
+                        needsUpdate = me.needsUpdate(parameters);
+                        if (!needsUpdate)
                             return [2 /*return*/];
+                        console.info("Getting weather", parameters);
                         return [4 /*yield*/, (0,openmeteo__WEBPACK_IMPORTED_MODULE_0__.fetchWeatherApi)(me.apiUrl, parameters)];
                     case 1:
                         responses = _a.sent();
@@ -2356,7 +2362,7 @@ var Weather = /** @class */ (function () {
             });
         });
     };
-    Weather.prototype.doFetchData = function (parameters) {
+    Weather.prototype.needsUpdate = function (parameters) {
         var me = this;
         if (!me.lastFetched) {
             parameters["daily"] = me.dailyVariables;
@@ -2366,8 +2372,8 @@ var Weather = /** @class */ (function () {
             return true;
         }
         else {
-            // Weather data is updated :00, :15, :30, :45 so wait at least a minute
-            if (me.lastFetched.current.getMinutes() % 15 >= 1 && me.lastFetched.current.getMinutes() % 15 < 6) {
+            // Weather data is updated every 15 minutes starting at :00 but just wait 15 minutes for an update
+            if (me.lastFetched.minutesSinceCurrent() >= 15) {
                 var now = new Date();
                 // Make sure data is over 5 minutes old at least
                 if ((now.getTime() - me.lastFetched.current.getTime()) > 300000) {
@@ -2492,11 +2498,14 @@ var LastFetched = /** @class */ (function () {
         this.hourly = new Date();
         this.daily = new Date();
     }
+    LastFetched.prototype.minutesSinceCurrent = function () {
+        return Math.floor((new Date().getTime() - this.current.getTime()) / 60000);
+    };
     LastFetched.prototype.hoursSinceHourly = function () {
-        return (new Date().getTime() - this.hourly.getTime()) / 3600000;
+        return Math.floor((new Date().getTime() - this.hourly.getTime()) / 3600000);
     };
     LastFetched.prototype.hoursSinceDaily = function () {
-        return (new Date().getTime() - this.daily.getTime()) / 3600000;
+        return Math.floor((new Date().getTime() - this.daily.getTime()) / 3600000);
     };
     return LastFetched;
 }());

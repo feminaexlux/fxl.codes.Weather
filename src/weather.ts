@@ -15,11 +15,11 @@ export default class Weather {
     constructor(latitude?: number, longitude?: number) {
         this.options = new WeatherOptions(latitude ?? 47.61002138071677, longitude ?? -122.17906310779568)
 
-        const time = document.getElementById("time")
+        const me = this
+        const time = document.getElementById("time-value")
         time.textContent = new Date().toLocaleTimeString("en-US", { hour12: false, timeStyle: "short" })
         setInterval(() => time.textContent = new Date().toLocaleTimeString("en-US", { hour12: false, timeStyle: "short" }), 15000)
 
-        const me = this
         setInterval(() => me.fetchWeather().then(() => me.setDisplay()), 300000)
         me.fetchWeather().then(() => me.setDisplay())
     }
@@ -37,7 +37,7 @@ export default class Weather {
             const hourly = response.hourly()
             const daily = response.daily()
 
-            if (current != null) me.setCurrentData(current)
+            if (current != null) me.current = new CurrentWeather(current)
             if (hourly != null) me.setHourlyData(hourly)
             if (daily != null) me.setDailyData(daily)
         }
@@ -80,20 +80,6 @@ export default class Weather {
         return false
     }
 
-    private setCurrentData(current: VariablesWithTime) {
-        this.current = {
-            time: new Date(Number(current.time()) * 1000),
-            temperature: current.variables(0)!.value(),
-            humidity: current.variables(1)!.value(),
-            feelsLike: current.variables(2)!.value(),
-            precipitation: current.variables(3)!.value(),
-            windSpeed: current.variables(4)!.value(),
-            windGusts: current.variables(5)!.value(),
-            windDirection: current.variables(6)!.value(),
-            cloudCoverage: current.variables(7)!.value()
-        }
-    }
-
     private setHourlyData(hourly: VariablesWithTime) {
         const length = Number(hourly.timeEnd() - hourly.time()) / hourly.interval()
         const temperatures = hourly.variables(0)!.valuesArray()
@@ -103,7 +89,7 @@ export default class Weather {
 
         for (let i = 0; i < length; i++) {
             this.hourly.push({
-                time: new Date((Number(hourly.time()) + i * hourly.interval()) * 1000),
+                time: new Date(new Date().getTime() + i * 3600000),
                 temperature: temperatures[i],
                 precipitation: precipitationTotals[i],
                 precipitationProbability: precipitationProbabilities[i]
@@ -127,31 +113,65 @@ export default class Weather {
         this.daily.length = 0
 
         for (let i = 0; i < length; i++) {
-            this.daily.push({
-                time: new Date((Number(daily.time()) + i * daily.interval()) * 1000),
-                maxTemperature: maxTemperatures[i],
-                minTemperature: minTemperatures[i],
-                sunrise: new Date((Number(sunrise.valuesInt64(i))) * 1000),
-                sunset: new Date((Number(sunset.valuesInt64(i))) * 1000),
-                maxUV: maxUVs[i],
-                totalPrecipitation: precipitationTotals[i],
-                hoursOfPrecipitation: precipitationHours[i],
-                maxWindSpeed: maxWindSpeeds[i],
-                maxWindGusts: maxWindGusts[i],
-                prominentWindDirection: prominentWindDirections[i]
-            })
+            const weather = new DailyWeather()
+            weather.time = new Date((Number(daily.time()) + i * daily.interval()) * 1000)
+            weather.maxTemperature = maxTemperatures[i]
+            weather.minTemperature = minTemperatures[i]
+            weather.sunrise = new Date((Number(sunrise.valuesInt64(i))) * 1000)
+            weather.sunset = new Date((Number(sunset.valuesInt64(i))) * 1000)
+            weather.maxUV = maxUVs[i]
+            weather.totalPrecipitation = precipitationTotals[i]
+            weather.hoursOfPrecipitation = precipitationHours[i]
+            weather.maxWindSpeed = maxWindSpeeds[i]
+            weather.maxWindGusts = maxWindGusts[i]
+            weather.prominentWindDirection = prominentWindDirections[i]
+
+            this.daily.push(weather)
         }
     }
 
     private setDisplay() {
+        console.debug(this)
         const current = document.getElementById("current")
-        current.innerHTML = `<header title="Temperature (feels like)"><span class="material">thermostat</span>${Math.round(this.current.temperature)} (${Math.round(this.current.feelsLike)})</header>
-<main>
-    <div><span class="material">water_drop</span> ${Math.round(this.current.humidity)}%</div>
-    <div><span class="material">cloud</span> ${Math.round(this.current.cloudCoverage)}%</div>
-    <div><span class="material">weather_mix</span> ${Math.round(this.current.precipitation)}%</div>
-    <div><span class="material">air</span> ${Math.round(this.current.windSpeed)} (${Math.round(this.current.windGusts)}) ${this.inCardinals(this.current.windDirection)}</div>
-</main>`
+        current.innerHTML = `<div><span class="material">thermostat</span>${Math.round(this.current.temperature)} (${Math.round(this.current.feelsLike)})</div>
+<div><span class="material">humidity_percentage</span> ${Math.round(this.current.humidity)}%</div>
+<div><span class="material">cloud</span> ${Math.round(this.current.cloudCoverage)}%</div>
+<div><span class="material">weather_mix</span> ${Math.round(this.current.precipitation)}%</div>
+<div><span class="material">air</span> ${Math.round(this.current.windSpeed)} (${Math.round(this.current.windGusts)}) ${this.inCardinals(this.current.windDirection)}</div>`
+        if (!this.daily) return
+
+        const icon = document.getElementById("time-icon")
+        icon.innerText = this.current.getCloudCoverageIcon(this.daily[0].sunrise, this.daily[0].sunset)
+
+        const dailySlots: string[] = []
+        for (const day of this.daily) {
+            dailySlots.push(`<div class="daily-slot">
+    <span class="date">${day.time.getDate()}</span>
+    <span class="range">${Math.round(day.minTemperature)} - ${Math.round(day.maxTemperature)}</span>
+    <span class="uv ${day.uvRating()}">${Math.round(day.maxUV)}</span>
+    <span class="sunrise">${day.sunrise.toLocaleTimeString("en-US", { timeStyle: "short", hour12: false })}</span>
+    <span class="sunset">${day.sunset.toLocaleTimeString("en-US", { timeStyle: "short", hour12: false })}</span>
+</div>`)
+        }
+
+        const daily = document.getElementById("daily")
+        daily.innerHTML = dailySlots.join("\r\n")
+
+        if (!this.hourly) return
+
+        const hourlySlots: string[] = []
+        for (let i = 0; i < 12; i++) {
+            const hour = this.hourly[i]
+            hourlySlots.push(`<div class="hourly-slot">
+    <span class="hour">${hour.time.getHours()}</span>
+    <span class="temp">${Math.round(hour.temperature)}</span>
+    <span class="precipitation">${hour.precipitation}<sup>"</sup></span>
+    <span class="chance">${hour.precipitationProbability}<sup>%</sup></span>
+</div>`)
+        }
+
+        const hourly = document.getElementById("hourly")
+        hourly.innerHTML = hourlySlots.join("\r\n")
     }
 
     private inCardinals(direction: number): string {
@@ -174,6 +194,7 @@ class WeatherOptions {
     "wind_speed_unit" = "mph"
     "temperature_unit" = "fahrenheit"
     "precipitation_unit" = "inch"
+    "forecast_hours": 12
 
     constructor(latitude: number, longitude: number, timezone = "America/Los_Angeles") {
         this.latitude = latitude
@@ -182,7 +203,7 @@ class WeatherOptions {
     }
 }
 
-interface CurrentWeather {
+class CurrentWeather {
     time: Date
     temperature: number
     humidity: number
@@ -192,9 +213,30 @@ interface CurrentWeather {
     windGusts: number
     windDirection: number
     cloudCoverage: number
+
+    constructor(current: VariablesWithTime) {
+        this.time = new Date(Number(current.time()) * 1000)
+        this.temperature = current.variables(0)!.value()
+        this.humidity = current.variables(1)!.value()
+        this.feelsLike = current.variables(2)!.value()
+        this.precipitation = current.variables(3)!.value()
+        this.windSpeed = current.variables(4)!.value()
+        this.windGusts = current.variables(5)!.value()
+        this.windDirection = current.variables(6)!.value()
+        this.cloudCoverage = current.variables(7)!.value()
+    }
+
+    getCloudCoverageIcon(sunrise?: Date, sunset?: Date): string {
+        if (this.cloudCoverage > 75 || !sunrise || !sunset) return "cloud"
+
+        if (this.time.getTime() > sunrise.getTime() && this.time.getTime() < sunset.getTime())
+            return this.cloudCoverage > 25 ? "partly_cloudy_day" : "clear_day"
+
+        return this.cloudCoverage > 25 ? "partly_cloudy_night" : "bedtime"
+    }
 }
 
-interface DailyWeather {
+class DailyWeather {
     time: Date
     hoursOfPrecipitation: number
     totalPrecipitation: number
@@ -206,6 +248,14 @@ interface DailyWeather {
     prominentWindDirection: number
     maxWindGusts: number
     maxWindSpeed: number
+
+    uvRating(): string {
+        if (this.maxUV < 3) return "low"
+        if (this.maxUV < 6) return "moderate"
+        if (this.maxUV < 8) return "high"
+        if (this.maxUV < 11) return "very-high"
+        return "extreme"
+    }
 }
 
 interface HourlyWeather {

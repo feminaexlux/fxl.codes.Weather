@@ -51,7 +51,60 @@ body {
 
     #time {
       font-size: 3rem;
+      margin-bottom: 1rem;
       text-align: center;
+
+      .material {
+        font-variation-settings: "FILL" 0, "wght" 700, "opsz" 24;
+        vertical-align: sub;
+      }
+    }
+
+    #hourly {
+      display: flex;
+      font-size: .75rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    #daily {
+      display: flex;
+
+      .daily-slot {
+        display: flex;
+        flex-direction: column;
+
+        .range {
+          white-space: nowrap;
+        }
+
+        .uv {
+          &.moderate {
+            color: yellow;
+            -webkit-text-fill-color: yellow;
+          }
+
+          &.high {
+            color: orange;
+            -webkit-text-fill-color: orange;
+          }
+
+          &.very-high {
+            color: red;
+            -webkit-text-fill-color: red;
+          }
+
+          &.extreme {
+            color: purple;
+            -webkit-text-fill-color: purple;
+          }
+        }
+      }
+    }
+
+    #current {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
     }
 
     section header {

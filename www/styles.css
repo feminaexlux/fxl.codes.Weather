@@ -51,7 +51,58 @@ body #weather-panel .material {
 html #weather-panel #time,
 body #weather-panel #time {
   font-size: 3rem;
+  margin-bottom: 1rem;
   text-align: center;
+}
+html #weather-panel #time .material,
+body #weather-panel #time .material {
+  font-variation-settings: "FILL" 0, "wght" 700, "opsz" 24;
+  vertical-align: sub;
+}
+html #weather-panel #hourly,
+body #weather-panel #hourly {
+  display: flex;
+  font-size: 0.75rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+html #weather-panel #daily,
+body #weather-panel #daily {
+  display: flex;
+}
+html #weather-panel #daily .daily-slot,
+body #weather-panel #daily .daily-slot {
+  display: flex;
+  flex-direction: column;
+}
+html #weather-panel #daily .daily-slot .range,
+body #weather-panel #daily .daily-slot .range {
+  white-space: nowrap;
+}
+html #weather-panel #daily .daily-slot .uv.moderate,
+body #weather-panel #daily .daily-slot .uv.moderate {
+  color: yellow;
+  -webkit-text-fill-color: yellow;
+}
+html #weather-panel #daily .daily-slot .uv.high,
+body #weather-panel #daily .daily-slot .uv.high {
+  color: orange;
+  -webkit-text-fill-color: orange;
+}
+html #weather-panel #daily .daily-slot .uv.very-high,
+body #weather-panel #daily .daily-slot .uv.very-high {
+  color: red;
+  -webkit-text-fill-color: red;
+}
+html #weather-panel #daily .daily-slot .uv.extreme,
+body #weather-panel #daily .daily-slot .uv.extreme {
+  color: purple;
+  -webkit-text-fill-color: purple;
+}
+html #weather-panel #current,
+body #weather-panel #current {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 html #weather-panel section header,
 body #weather-panel section header {
